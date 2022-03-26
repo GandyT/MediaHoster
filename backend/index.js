@@ -25,6 +25,7 @@ wsServer.on("connection", socket => {
     var validatePayload = { op: 1, t: "SUCCESS", success: true }
     socket.send(JSON.stringify(validatePayload));
     socket.id = wsServer.getUniqueID();
+    socket.inRoom = false;
 
     /* SOCKET HANDLERS */
     socket.on("message", require("./websocket/onmessage.js").bind(socket));

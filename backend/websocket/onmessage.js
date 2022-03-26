@@ -21,7 +21,7 @@ function onmessage(payload) {
 
        let roomCode = RoomManager.createRoom();
        
-       socket.send(JSON.stringify({ success: true, op: 2, t: "ROOM_CREATED", data: { code: roomCode }}));
+       socket.send(JSON.stringify({ op: 2, t: "ROOM_CREATED", data: { code: roomCode }}));
    } else if (op == 2) {
         // join room 
         if (inRoom) return socket.send(ErrorLoad)
@@ -36,7 +36,7 @@ function onmessage(payload) {
 
         socket.inRoom = true;
         socket.on("close", () => room.removePlayer(socket));
-        socket.send(JSON.stringify({ success: true, t: "ROOM_JOIN", op: 6, d: {
+        socket.send(JSON.stringify({ t: "ROOM_JOIN", op: 6, d: {
             players: room.players,
             videoTime: room.videoTime,
             paused: room.paused
@@ -60,19 +60,44 @@ function onmessage(payload) {
 
         socket.send(SuccessLoad);
    } else if (op == 4) {
-       // update room
+        // pause room
+        if (!inRoom) return socket.send(ErrorLoad);
+
+        let roomCode = d.code;
+        let room = RoomManager.getRoom(roomCode);
+
+        if (!room) return socket.send(ErrorLoad);
+        if (!room.players[socket.id].isLeader) return socket.send(ErrorLoad);
+
+        room.setPause(true);
+
+        socket.send(SuccessLoad);
+    } else if (op == 5) {
+        // unpause room
+        if (!inRoom) return socket.send(ErrorLoad);
+
+        let roomCode = d.code;
+        let room = RoomManager.getRoom(roomCode);
+
+        if (!room) return socket.send(ErrorLoad);
+        if (!room.players[socket.id].isLeader) return socket.send(ErrorLoad);
+
+        room.setPause(false);
+
+        socket.send(SuccessLoad);
+   } else if (op == 6) {
+       // change url
        if (!inRoom) return socket.send(ErrorLoad);
 
-       let roomCode = d.code;
-       let room = RoomManager.getRoom(roomCode);
+        let roomCode = d.code;
+        let room = RoomManager.getRoom(roomCode);
 
-       if (!room) return socket.send(ErrorLoad);
+        if (!room) return socket.send(ErrorLoad);
+        if (!room.players[socket.id].isLeader) return socket.send(ErrorLoad);
 
-       for (let [key, value] of Object.entries(d)) {
-           room[key] = value;
-       }
+        room.videoUrl = d.url;
 
-       socket.send(SuccessLoad);
+        socket.send(SuccessLoad);
    }
 }
 

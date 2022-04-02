@@ -11,7 +11,7 @@ const generateCode = () => {
 }
 
 class Room {
-    constructor(){
+    constructor() {
         this.players = {}
         this.code = generateCode() //make function to generate room code
         this.paused = false
@@ -21,7 +21,7 @@ class Room {
     }
 
     addPlayer(socket, username) {
-        this.broadcast({ op: 3, t: "PLAYER_JOIN", d: { username: "USERNAME", id: socket.id }})
+        this.broadcast({ op: 3, t: "PLAYER_JOIN", d: { username: "USERNAME", id: socket.id } })
 
         this.players[socket.id] = { id: socket.id, username: username, isLeader: false }
         if (Object.keys(this.players).length == 1) {
@@ -31,21 +31,22 @@ class Room {
 
     removePlayer(socket) {
         let wasLeader = this.players[socket.id].isLeader
+
         delete this.players[socket.id];
 
         if (Object.keys(this.players) > 0) {
-            this.broadcast({ op: 4, t: "PLAYER_LEFT", d: { id: socket.id}});
+            this.broadcast({ op: 4, t: "PLAYER_LEFT", d: { id: socket.id } });
 
             if (wasLeader) {
                 // pick a new leader
                 this.players[Object.keys(this.players)[0]].isLeader = true;
-                this.broadcast({ op: 5, t: "NEW_LEADER", d: { id: Object.keys(this.players)[0]}});
+                this.broadcast({ op: 5, t: "NEW_LEADER", d: { id: Object.keys(this.players)[0] } });
             }
         }
     }
 
     broadcast(data) {
-        for(value of Object.values(this.players)) {
+        for (value of Object.values(this.players)) {
             value.socket.send(JSON.stringify(data))
         }
     }

@@ -4,15 +4,15 @@ let rooms = [];
 module.exports = {
     createRoom: () => {
         let newRoom = new Room();
-        
+
         rooms.push(newRoom);
 
         return newRoom.code;
     },
-    getRoom: (id) => {
-        return rooms.find(r => r.id == id);
+    getRoom: (code) => {
+        return rooms.find(r => r.code == code);
     },
-    removeRoom: (id) => {
-        rooms = rooms.filter(r => r.id != id);
+    removeRoom: (code) => {
+        rooms = rooms.filter(r => r.code != code);
     }
 }

@@ -9,7 +9,8 @@ export default class Home extends React.Component {
         this.joinRoomPath = "/joinroom"
         this.state = {
             roomCode: "",
-            //redirectTo: ""
+            redirectTo: "",
+            error: ""
         }
     }
 
@@ -39,12 +40,21 @@ export default class Home extends React.Component {
                 <div id="homePage">
                     <div>MediaParty!</div>
                     <div id="homePageBtns">
-                        <button className="homePageBtn" onClick={(e) => { this.setState({ redirectTo: this.createRoomPath }) }}>Create Room</button>
+                        <button className="homePageBtn" onClick={(e) => {
+                            if (Session.getData().socket) {
+                                this.setState({ redirectTo: this.createRoomPath })
+                            } else {
+                                this.setState({ error: "Internal Error" })
+                            }
+                        }}>Create Room</button>
                         <div id="homeJoinBtns">
                             {/*<input value={this.state.roomCode} onChange={this.changeCode} placeholder="Room Code" /> */}
                             <button className="homePageBtn" onClick={(e) => {
-
-                                this.setState({ redirectTo: this.joinRoomPath })
+                                if (Session.getData().socket) {
+                                    this.setState({ redirectTo: this.joinRoomPath })
+                                } else {
+                                    this.setState({ error: "Internal Error" })
+                                }
                             }}>Join Room</button>
                         </div>
                     </div>
@@ -64,7 +74,12 @@ export default class Home extends React.Component {
                 Session.setData(oldSess);
             }
 
-            ws.onclose = () => setTimeout(() => setup(), 100); // add a timer to prevent spamming server
+            ws.onclose = () => {
+                let oldSess = Session.getData();
+                oldSess.socket = "";
+                Session.setData(oldSess);
+                setTimeout(() => setup(), 100)
+            }; // add a timer to prevent spamming server
         }
 
         setup();

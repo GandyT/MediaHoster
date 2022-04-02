@@ -5,9 +5,21 @@ App.disable("x-powered-by")
 const WS = require("ws");
 const path = require("path");
 
+const Cors = require("cors");
+const BodyParser = require("body-parser");
+const roomManager = require("./websocket/roomManager.js");
+
+/* MIDDLEWARE */
+App.use(Cors());
+App.use(BodyParser.json());
+
 App.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname + "/../frontend/build/index.html"))
 })
+
+/* BACKEND ROUTES */
+App.use("/api/createroom", require("./routes/createroom.js"));
+App.use("/api/roomexists", require("./routes/roomexists.js"));
 
 App.listen(80, () => {
     console.log(`App is running on Port 80`);
@@ -29,5 +41,7 @@ wsServer.on("connection", socket => {
 
     /* SOCKET HANDLERS */
     socket.on("message", require("./websocket/onmessage.js").bind(socket));
+    // already have a socket on close functionality DON'T ADD IT LMFAO YOU WILL DIE
+    // check onmessage.js op code 2 to see it xd
 });
 

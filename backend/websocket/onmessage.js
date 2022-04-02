@@ -7,13 +7,15 @@ const SuccessLoad = JSON.stringify({ success: true });
 
 function onmessage(payload) {
     const socket = this;
-    const inRoom = false;
     var data = JSON.parse(payload);
     var op = data.op;
     var d = data.d; // main data stored here ( sorry confusing variable names xd )
 
     if (op == 1) {
-        // create room
+        /* create room
+        DEPRECATED: create-room will now use a static api endpoint
+        down-sides: we can't check if they are in room so people can spam create but
+        who cares it's gonna be some dumb site anyways :D
         if (inRoom) {
             socket.send(ErrorLoad)
             return;
@@ -22,9 +24,11 @@ function onmessage(payload) {
         let roomCode = RoomManager.createRoom();
 
         socket.send(JSON.stringify({ op: 2, t: "ROOM_CREATED", data: { code: roomCode } }));
+        */
     } else if (op == 2) {
         // join room 
-        if (inRoom) return socket.send(ErrorLoad)
+        console.log(socket.id + " Joined Room")
+        if (socket.inRoom) return socket.send(ErrorLoad)
 
         let username = d.username
         let roomCode = d.code
@@ -35,17 +39,21 @@ function onmessage(payload) {
         room.addPlayer(socket, username);
 
         socket.inRoom = true;
-        socket.on("close", () => room.removePlayer(socket));
+        socket.on("close", () => {
+            if (room.players[socket.id]) room.removePlayer(socket)
+        });
         socket.send(JSON.stringify({
             t: "ROOM_JOIN", op: 6, d: {
                 players: room.players,
                 videoTime: room.videoTime,
-                paused: room.paused
+                paused: room.paused,
+                id: socket.id // send them back their id
             }
         }))
     } else if (op == 3) {
+        console.log(socket.id + " Left Room")
         // leave room
-        if (!inRoom) return socket.send(ErrorLoad)
+        if (!socket.inRoom) return socket.send(ErrorLoad)
 
         let roomCode = d.code;
         let room = RoomManager.getRoom(roomCode);
@@ -54,7 +62,8 @@ function onmessage(payload) {
 
         room.removePlayer(socket);
 
-        if (room.players.length <= 0) {
+        if (Object.keys(room.players).length <= 0) {
+            console.log(roomCode + " Room Deleted")
             RoomManager.removeRoom(roomCode);
         }
 
@@ -62,8 +71,9 @@ function onmessage(payload) {
 
         socket.send(SuccessLoad);
     } else if (op == 4) {
+        console.log(socket.id + " Pause Room")
         // pause room
-        if (!inRoom) return socket.send(ErrorLoad);
+        if (!socket.inRoom) return socket.send(ErrorLoad);
 
         let roomCode = d.code;
         let room = RoomManager.getRoom(roomCode);
@@ -75,8 +85,9 @@ function onmessage(payload) {
 
         socket.send(SuccessLoad);
     } else if (op == 5) {
+        console.log(socket.id + " Unpause Room")
         // unpause room
-        if (!inRoom) return socket.send(ErrorLoad);
+        if (!socket.inRoom) return socket.send(ErrorLoad);
 
         let roomCode = d.code;
         let room = RoomManager.getRoom(roomCode);
@@ -88,8 +99,9 @@ function onmessage(payload) {
 
         socket.send(SuccessLoad);
     } else if (op == 6) {
+        console.log(socket.id + " Change Room Url")
         // change url
-        if (!inRoom) return socket.send(ErrorLoad);
+        if (!socket.inRoom) return socket.send(ErrorLoad);
 
         let roomCode = d.code;
         let room = RoomManager.getRoom(roomCode);
@@ -102,9 +114,10 @@ function onmessage(payload) {
 
         socket.send(SuccessLoad);
     } else if (op == 7) {
+        console.log(socket.id + " Video Ended")
         // video ended
         // change url
-        if (!inRoom) return socket.send(ErrorLoad);
+        if (!socket.inRoom) return socket.send(ErrorLoad);
 
         let roomCode = d.code;
         let room = RoomManager.getRoom(roomCode);

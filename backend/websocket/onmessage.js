@@ -47,6 +47,7 @@ function onmessage(payload) {
                 players: room.players,
                 videoTime: room.videoTime,
                 paused: room.paused,
+                videoUrl: room.videoUrl,
                 id: socket.id // send them back their id
             }
         }))

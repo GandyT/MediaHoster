@@ -2,7 +2,8 @@ let session = {
     username: "",
     roomCode: "",
     socket: "",
-    id: ""
+    id: "",
+    roomData: ""
 }
 
 let Session = {

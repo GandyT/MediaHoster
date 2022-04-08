@@ -3,111 +3,11 @@ import Session from "../sessionManager.js";
 import { Navigate } from "react-router-dom"
 import * as Axios from "axios";
 import RoomClass from "../room.js"
+import RoomVideo from "../components/roomVideo.js"
+import PlayerList from "../components/playerList.js"
+import ErrorCard from "../components/errorCard.js"
 
-class RoomVideo extends React.Component {
-    constructor(props) {
-        super(props)
 
-        this.props = props
-        this.onPause = props.onPause
-        this.onUnpause = props.onUnpause
-        this.video = React.createRef()
-
-        let clientSess = Session.getData()
-        let clientRoom = clientSess.roomData
-
-        this.state = {
-            paused: clientRoom.paused,
-            videoTime: clientRoom.videoTime || 0,
-            videoUrl: clientRoom.videoUrl
-        }
-    }
-
-    componentDidMount = () => {
-        window.setInterval(() => {
-            this.setState({ videoTime: this.video.current?.currentTime })
-        }, 1000)
-
-        // add room callback functions to react with component
-        let clientSess = Session.getData()
-        let clientRoom = clientSess.roomData
-
-        clientRoom.on("onpause", this.pause)
-        clientRoom.on("unpause", this.unpause)
-        clientRoom.on("ontimechange", this.onTimeChange)
-        clientRoom.on("onurlchange", this.onUrlChange)
-    }
-
-    /*  
-    // debug
-    componentDidUpdate = () => {
-        console.log(this.state)
-    }
-    */
-
-    pause = () => {
-        this.video.current.pause()
-        this.setState({ paused: true })
-    }
-
-    unpause = () => {
-        this.video.current.play()
-        this.setState({ paused: false })
-    }
-
-    onTimeChange = (newTime) => {
-        this.video.current.currentTime = newTime
-        this.setState({ videoTime: newTime })
-
-    }
-
-    onUrlChange = (url) => {
-        this.video.current.src = url
-        this.video.current.currentTime = 0
-        this.setState({ videoUrl: url, videoTime: 0 })
-    }
-
-    renderVideoControls = () => {
-        let clientSess = Session.getData()
-        let clientRoom = clientSess.roomData
-
-        let renderBtn = () => {
-            if (!clientRoom.players[clientSess.id].isLeader) return; // if client isn't leader, no video controls
-            if (this.state.paused) {
-                return <div id="playBtn" onClick={this.onUnpause}></div>
-            } else {
-                return <div id="pauseBtn" onClick={this.onPause}></div>
-            }
-        }
-
-        return (
-            <div id="customVideoControls">
-                {renderBtn()}
-                <div id="videoTime">{this.state.videoTime}</div>
-            </div>
-        )
-    }
-
-    /* 
-    this is kinda iffy, it might break stuff but it should increase efficiency
-    shouldComponentUpdate = (nextProps) => {
-        return false
-    }
-    */
-
-    render() {
-        return (
-            <div id="customVideoContainer">
-                <video
-                    id="customVideo"
-                    src={this.src}
-                    ref={this.video}
-                />
-                {this.renderVideoControls()}
-            </div>
-        )
-    }
-}
 
 export default class Room extends React.Component {
     constructor(props) {
@@ -116,6 +16,8 @@ export default class Room extends React.Component {
         this.state = {
             loading: true,
             redirect: false,
+            urlInput: "",
+            error: false
         }
     }
 
@@ -151,11 +53,13 @@ export default class Room extends React.Component {
             let op = data.op
             let d = data.d
             let clientSess = Session.getData()
+            let clientRoom = clientSess.roomData
 
+            // parse actions
             if (op == 6) {
                 // ROOM_JOIN DATA
                 let clientId = d.id
-                let clientRoom = new RoomClass()
+                clientRoom = new RoomClass()
                 clientRoom.players = d.players
                 clientRoom.paused = d.paused
                 clientRoom.videoTime = d.videoTime
@@ -166,11 +70,12 @@ export default class Room extends React.Component {
                 clientSess.roomData = clientRoom
                 Session.setData(clientSess)
 
-                // set video logic, set room events
-                clientRoom.on("")
-
                 // finish loading at the end
                 this.setState({ loading: false })
+            } else if (op == 3) {
+                // player join
+                clientRoom.addPlayer(d.id, d.username)
+                Session.setData(clientSess);
             }
 
             console.log(data)
@@ -195,11 +100,38 @@ export default class Room extends React.Component {
 
     // these two just use websocket to send pause and unpause payloads
     onPause = () => {
-
+        let clientSess = Session.getData()
+        let ws = clientSess.socket
+        ws.send(JSON.stringify({ op: 4, d: { code: clientSess.roomCode } }))
     }
 
     onUnpause = () => {
+        let clientSess = Session.getData()
+        let ws = clientSess.socket
+        ws.send(JSON.stringify({ op: 5, d: { code: clientSess.roomCode } }))
+    }
 
+    changeUrl = () => {
+        let clientSess = Session.getData()
+        let ws = clientSess.socket
+
+        /* ERROR CHECKS FOR CURRENT URL HERE */
+        if (!this.state.urlInput) {
+            return this.setState({ error: "Invalid Url" })
+        }
+        /* ==================================== */
+
+        // send websocket payload
+        ws.send(JSON.stringify({ op: 6, d: { url: this.state.urlInput } }))
+    }
+
+    onUrlChange = (e) => {
+        this.setState({ urlInput: e.target.value })
+    }
+
+    renderError = () => {
+        if (this.state.error)
+            return <ErrorCard error={this.state.error} onDelete={() => { this.setState({ error: "" }) }} />
     }
 
     renderPage = () => {
@@ -208,9 +140,20 @@ export default class Room extends React.Component {
         } else {
             // actual page
             return (
-                <div id="roomPage">
-                    <RoomVideo onPause={this.onPause} onUnpause={this.onUnpause} />
-                </div>
+                <React.Fragment>
+                    {this.renderError()}
+                    <div id="roomPage">
+                        <div id="roomData">
+                            <div id="roomCode">{Session.getData().roomData.roomCode}</div>
+                        </div>
+                        <RoomVideo onPause={this.onPause} onUnpause={this.onUnpause} />
+                        <PlayerList />
+                        <div id="urlInputCont">
+                            <input id="urlInput" placeholder="enter a url" onChange={this.onUrlChange} value={this.state.urlInput} />
+                            <button onClick={this.changeUrl}>Change Url</button>
+                        </div>
+                    </div>
+                </React.Fragment>
             )
         }
     }

@@ -42,9 +42,18 @@ function onmessage(payload) {
         socket.on("close", () => {
             if (room.players[socket.id]) room.removePlayer(socket)
         });
+
+        let circularRemoved = {}
+        for (let key of Object.keys(room.players)) {
+            circularRemoved[key] = {}
+            circularRemoved[key].id = room.players[key].id
+            circularRemoved[key].username = room.players[key].username
+            circularRemoved[key].isLeader = room.players[key].isLeader
+        }
+
         socket.send(JSON.stringify({
             t: "ROOM_JOIN", op: 6, d: {
-                players: room.players,
+                players: circularRemoved,
                 videoTime: room.videoTime,
                 paused: room.paused,
                 videoUrl: room.videoUrl,

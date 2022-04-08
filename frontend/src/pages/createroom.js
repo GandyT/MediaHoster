@@ -26,10 +26,8 @@ export default class CreateRoom extends React.Component {
     }
 
     usernameChange = (e) => {
-        if (e.target.value.length > 30) {
-            this.setState({ error: "Max Char: 30" })
+        if (e.target.value.length > 30)
             return
-        }
 
         this.setState({ username: e.target.value })
     }

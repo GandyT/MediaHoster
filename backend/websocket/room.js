@@ -21,9 +21,9 @@ class Room {
     }
 
     addPlayer(socket, username) {
-        this.broadcast({ op: 3, t: "PLAYER_JOIN", d: { username: "USERNAME", id: socket.id } })
+        this.broadcast({ op: 3, t: "PLAYER_JOIN", d: { username: username, id: socket.id } })
 
-        this.players[socket.id] = { id: socket.id, username: username, isLeader: false }
+        this.players[socket.id] = { id: socket.id, username: username, isLeader: false, socket: socket }
         if (Object.keys(this.players).length == 1) {
             this.players[socket.id].isLeader = true;
         }
@@ -46,7 +46,7 @@ class Room {
     }
 
     broadcast(data) {
-        for (value of Object.values(this.players)) {
+        for (let value of Object.values(this.players)) {
             value.socket.send(JSON.stringify(data))
         }
     }

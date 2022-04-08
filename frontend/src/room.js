@@ -4,6 +4,7 @@ onpause
 onunpause
 ontimechange
 onurlchange
+playerupdate ( whatever using this will just get the players list again )
 */
 
 class RoomClass {
@@ -15,6 +16,32 @@ class RoomClass {
         this.videoUrl = ""
 
         this.events = {}
+    }
+
+    addPlayer(id, username) {
+        this.players[id] = { username: username }
+        this.call("playerupdate")
+    }
+
+    removePlayer(id) {
+        if (this.players[id]) {
+            this.call("playerupdate")
+            delete this.players[id]
+        }
+    }
+
+    setLeader(id) {
+        if (this.players[id]) {
+            this.call("playerupdate")
+            this.players[id].isLeader = true
+        }
+    }
+
+    removeLeader(id) {
+        if (this.players[id]) {
+            this.call("playerupdate")
+            this.players[id].isLeader = false
+        }
     }
 
     pause() {

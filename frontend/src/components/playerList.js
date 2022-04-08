@@ -27,6 +27,7 @@ export default class PlayerList extends React.Component {
     renderPlayers = () => {
         let playerList = [] // push divs into here
 
+        let i = 0
         for (let pData of Object.values(this.state.players)) {
             let playerName = pData.username
 
@@ -34,7 +35,8 @@ export default class PlayerList extends React.Component {
                 playerName += " (Leader)"
             }
 
-            playerList.push(<div className="playerListElement">{playerName}</div>)
+            playerList.push(<div className="playerListElement" key={i}>{playerName}</div>)
+            i++
         }
 
         return (

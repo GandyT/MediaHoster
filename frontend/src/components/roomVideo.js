@@ -33,6 +33,9 @@ export default class RoomVideo extends React.Component {
         clientRoom.on("unpause", this.unpause)
         clientRoom.on("ontimechange", this.onTimeChange)
         clientRoom.on("onurlchange", this.onUrlChange)
+
+        // play video
+        if (!this.state.paused) this.video.current.play()
     }
 
     /*  
@@ -95,7 +98,7 @@ export default class RoomVideo extends React.Component {
     videoEnd = () => {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
-        // IF CLIENT IS LEADER, SEND WS PAYLOAD
+        // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
         if (clientRoom.players[clientSess.id].isLeader) {
             clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
         }

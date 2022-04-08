@@ -75,7 +75,27 @@ export default class Room extends React.Component {
             } else if (op == 3) {
                 // player join
                 clientRoom.addPlayer(d.id, d.username)
-                Session.setData(clientSess);
+            } else if (op == 4) {
+                // player left
+                clientRoom.removePlayer(d.id)
+            } else if (op == 5) {
+                // leadership change
+                clientRoom.removeLeader()
+                clientRoom.setLeader(d.id)
+            } else if (op == 7) {
+                // pause update
+                let isPause = d.pause
+
+                if (isPause) {
+                    clientRoom.pause()
+                } else {
+                    clientRoom.unpause()
+                }
+            } else if (op == 8) {
+                // video update
+                clientRoom.changeUrl(d.url)
+            } else if (op == 9) {
+                console.log("Host video has ended...")
             }
 
             console.log(data)
@@ -122,11 +142,24 @@ export default class Room extends React.Component {
         /* ==================================== */
 
         // send websocket payload
-        ws.send(JSON.stringify({ op: 6, d: { url: this.state.urlInput } }))
+        ws.send(JSON.stringify({ op: 6, d: { code: clientSess.roomCode, url: this.state.urlInput } }))
     }
 
     onUrlChange = (e) => {
         this.setState({ urlInput: e.target.value })
+    }
+
+    renderUrlInput = () => {
+        let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
+
+        if (clientRoom.players[clientSess.id].isLeader)
+            return (
+                <div id="urlInputCont">
+                    <input id="urlInput" placeholder="enter a url" onChange={this.onUrlChange} value={this.state.urlInput} />
+                    <button onClick={this.changeUrl}>Change Url</button>
+                </div>
+            )
     }
 
     renderError = () => {
@@ -148,10 +181,7 @@ export default class Room extends React.Component {
                         </div>
                         <RoomVideo onPause={this.onPause} onUnpause={this.onUnpause} />
                         <PlayerList />
-                        <div id="urlInputCont">
-                            <input id="urlInput" placeholder="enter a url" onChange={this.onUrlChange} value={this.state.urlInput} />
-                            <button onClick={this.changeUrl}>Change Url</button>
-                        </div>
+                        {this.renderUrlInput()}
                     </div>
                 </React.Fragment>
             )

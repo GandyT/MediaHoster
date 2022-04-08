@@ -37,10 +37,13 @@ class RoomClass {
         }
     }
 
-    removeLeader(id) {
-        if (this.players[id]) {
-            this.call("playerupdate")
-            this.players[id].isLeader = false
+    removeLeader() {
+        for (let key of Object.keys(this.players)) {
+            if (this.players[key].isLeader) {
+                this.players[key].isLeader = false;
+                this.call("playerupdate")
+                return
+            }
         }
     }
 

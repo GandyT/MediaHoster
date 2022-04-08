@@ -66,6 +66,7 @@ export default class Home extends React.Component {
     componentDidMount = () => {
         console.log("home page loaded")
         const setup = () => {
+
             const ws = new WebSocket(`ws://${window.location.hostname}:8080/websocket`);
 
             ws.onopen = () => {

@@ -7,11 +7,11 @@ const path = require("path");
 
 const Cors = require("cors");
 const BodyParser = require("body-parser");
-const roomManager = require("./websocket/roomManager.js");
 
 /* MIDDLEWARE */
 App.use(Cors());
 App.use(BodyParser.json());
+App.use(Express.static(path.join(__dirname, "../frontend/build/")))
 
 App.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname + "/../frontend/build/index.html"))

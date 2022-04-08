@@ -26,10 +26,15 @@ export default class PlayerList extends React.Component {
 
     renderPlayers = () => {
         let playerList = [] // push divs into here
+        let clientSess = Session.getData()
 
         let i = 0
         for (let pData of Object.values(this.state.players)) {
             let playerName = pData.username
+
+            if (pData.id == clientSess.id) {
+                playerName = "You"
+            }
 
             if (pData.isLeader) {
                 playerName += " (Leader)"

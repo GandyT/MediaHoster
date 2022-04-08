@@ -19,21 +19,21 @@ class RoomClass {
     }
 
     addPlayer(id, username) {
-        this.players[id] = { username: username }
+        this.players[id] = { username: username, id: id }
         this.call("playerupdate")
     }
 
     removePlayer(id) {
         if (this.players[id]) {
-            this.call("playerupdate")
             delete this.players[id]
+            this.call("playerupdate")
         }
     }
 
     setLeader(id) {
         if (this.players[id]) {
-            this.call("playerupdate")
             this.players[id].isLeader = true
+            this.call("playerupdate")
         }
     }
 

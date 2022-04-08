@@ -7,7 +7,7 @@ import RoomVideo from "../components/roomVideo.js"
 import PlayerList from "../components/playerList.js"
 import ErrorCard from "../components/errorCard.js"
 
-
+// bug when changing url video doesn't play
 
 export default class Room extends React.Component {
     constructor(props) {

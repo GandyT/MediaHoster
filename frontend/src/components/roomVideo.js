@@ -12,10 +12,10 @@ export default class RoomVideo extends React.Component {
 
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
-
+        // clientRoom.videoTime uses ms and this class uses seconds
         this.state = {
             paused: clientRoom.paused,
-            videoTime: clientRoom.videoTime || 0,
+            videoTime: (clientRoom.videoTime / 1000) || 0,
             videoUrl: clientRoom.videoUrl
         }
     }
@@ -35,6 +35,7 @@ export default class RoomVideo extends React.Component {
         clientRoom.on("onurlchange", this.onUrlChange)
 
         // play video
+        this.video.current.currentTime = this.state.videoTime
         if (!this.state.paused) this.video.current.play()
     }
 
@@ -62,8 +63,11 @@ export default class RoomVideo extends React.Component {
     }
 
     onUrlChange = (url) => {
+        let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
         this.video.current.src = url
         this.video.current.currentTime = 0
+
         this.setState({ videoUrl: url, videoTime: 0 })
     }
 
@@ -106,7 +110,7 @@ export default class RoomVideo extends React.Component {
         // clear video data from room
         clientRoom.videoTime = 0
         clientRoom.videoUrl = ""
-        Session.setData(clientRoom)
+        Session.setData(clientSess)
     }
 
     render() {
@@ -114,7 +118,7 @@ export default class RoomVideo extends React.Component {
             <div id="customVideoContainer">
                 <video
                     id="customVideo"
-                    src={this.src}
+                    src={this.state.videoUrl}
                     ref={this.video}
                     onEnded={this.videoEnd}
                 />

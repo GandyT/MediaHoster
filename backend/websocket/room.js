@@ -31,10 +31,11 @@ class Room {
 
     removePlayer(socket) {
         let wasLeader = this.players[socket.id].isLeader
+        console.log(socket.id + " Left")
 
         delete this.players[socket.id];
 
-        if (Object.keys(this.players) > 0) {
+        if (Object.keys(this.players).length > 0) {
             this.broadcast({ op: 4, t: "PLAYER_LEFT", d: { id: socket.id } });
 
             if (wasLeader) {
@@ -53,7 +54,7 @@ class Room {
 
     setPause(bool) {
         this.paused = bool;
-        if (this.paused) {
+        if (!this.paused) {
             this.lastCheck = new Date().getTime();
         }
         this.broadcast({ op: 7, t: "PAUSE_UPDATE", d: { paused: bool } });

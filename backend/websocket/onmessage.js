@@ -41,6 +41,10 @@ function onmessage(payload) {
         socket.inRoom = true;
         socket.on("close", () => {
             if (room.players[socket.id]) room.removePlayer(socket)
+            if (Object.keys(room.players).length <= 0) {
+                console.log(roomCode + " Room Deleted")
+                RoomManager.removeRoom(roomCode);
+            }
         });
 
         let circularRemoved = {}
@@ -54,7 +58,7 @@ function onmessage(payload) {
         socket.send(JSON.stringify({
             t: "ROOM_JOIN", op: 6, d: {
                 players: circularRemoved,
-                videoTime: room.videoTime,
+                videoTime: room.getVideoTime(),
                 paused: room.paused,
                 videoUrl: room.videoUrl,
                 id: socket.id // send them back their id
@@ -120,6 +124,8 @@ function onmessage(payload) {
         if (!room.players[socket.id].isLeader) return socket.send(ErrorLoad);
 
         room.videoUrl = d.url;
+        room.videoTime = 0;
+        room.lastCheck = new Date().getTime()
         room.broadcast({ op: 8, t: "VIDEO_UPDATE", d: { url: d.url } });
 
         socket.send(SuccessLoad);

@@ -30,7 +30,7 @@ export default class RoomVideo extends React.Component {
         let clientRoom = clientSess.roomData
 
         clientRoom.on("onpause", this.pause)
-        clientRoom.on("unpause", this.unpause)
+        clientRoom.on("onunpause", this.unpause)
         clientRoom.on("ontimechange", this.onTimeChange)
         clientRoom.on("onurlchange", this.onUrlChange)
 
@@ -39,12 +39,15 @@ export default class RoomVideo extends React.Component {
         if (!this.state.paused) this.video.current.play()
     }
 
-    /*  
-    // debug
     componentDidUpdate = () => {
-        console.log(this.state)
+        if (!this.state.videoUrl) return
+
+        if (!this.state.paused) {
+            this.video.current.play()
+        } else {
+            this.video.current.pause()
+        }
     }
-    */
 
     pause = () => {
         this.video.current.pause()
@@ -57,9 +60,8 @@ export default class RoomVideo extends React.Component {
     }
 
     onTimeChange = (newTime) => {
-        this.video.current.currentTime = newTime
-        this.setState({ videoTime: newTime })
-
+        this.video.current.currentTime = newTime / 1000
+        this.setState({ videoTime: newTime / 1000 })
     }
 
     onUrlChange = (url) => {
@@ -71,6 +73,16 @@ export default class RoomVideo extends React.Component {
         this.setState({ videoUrl: url, videoTime: 0 })
     }
 
+    changeTime = (newTime) => {
+        let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
+        if (!this.state.videoUrl) return;
+
+        let ws = clientSess.socket
+        let sentTime = Math.max(Math.min(newTime, this.video.current.duration), 0)
+        ws.send(JSON.stringify({ op: 8, d: { code: clientSess.roomCode, videoTime: sentTime } }))
+    }
+
     renderVideoControls = () => {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
@@ -78,16 +90,18 @@ export default class RoomVideo extends React.Component {
         let renderBtn = () => {
             if (!clientRoom.players[clientSess.id].isLeader) return; // if client isn't leader, no video controls
             if (this.state.paused) {
-                return <div id="playBtn" onClick={this.onUnpause}></div>
+                return <button id="playBtn" onClick={this.onUnpause}>play</button>
             } else {
-                return <div id="pauseBtn" onClick={this.onPause}></div>
+                return <button id="pauseBtn" onClick={this.onPause}>pause</button>
             }
         }
 
         return (
             <div id="customVideoControls">
                 {renderBtn()}
-                <div id="videoTime">{this.state.videoTime}</div>
+                <button id="backwardFive" onClick={() => this.changeTime(this.video.current.currentTime - 5)}>Backward</button>
+                <button id="forwardFive" onClick={() => this.changeTime(this.video.current.currentTime + 5)}>Forward</button>
+                <div id="videoTime">{Math.floor(this.state.videoTime)}</div>
             </div>
         )
     }
@@ -110,8 +124,12 @@ export default class RoomVideo extends React.Component {
         // clear video data from room
         clientRoom.videoTime = 0
         clientRoom.videoUrl = ""
+        this.video.current.src = ""
+        this.setState({ videoUrl: "" })
         Session.setData(clientSess)
     }
+
+
 
     render() {
         return (

@@ -73,6 +73,14 @@ class Room {
 
         return this.videoTime;
     }
+
+    setVideoTime(ms) {
+        this.videoTime = ms
+        this.lastCheck = new Date().getTime()
+
+        // broadcast time change to everyone
+        this.broadcast({ op: 10, t: "TIME_CHANGED", d: { videoTime: this.videoTime } })
+    }
 }
 
 module.exports = Room

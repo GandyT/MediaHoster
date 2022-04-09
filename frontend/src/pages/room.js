@@ -84,7 +84,7 @@ export default class Room extends React.Component {
                 clientRoom.setLeader(d.id)
             } else if (op == 7) {
                 // pause update
-                let isPause = d.pause
+                let isPause = d.paused
 
                 if (isPause) {
                     clientRoom.pause()
@@ -96,6 +96,9 @@ export default class Room extends React.Component {
                 clientRoom.changeUrl(d.url)
             } else if (op == 9) {
                 console.log("Host video has ended...")
+            } else if (op == 10) {
+                // video time update
+                clientRoom.changeTime(d.videoTime)
             }
 
             console.log(data)

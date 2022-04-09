@@ -145,6 +145,24 @@ function onmessage(payload) {
         room.broadcast({ op: 9, t: "VIDEO_END" });
 
         socket.send(SuccessLoad);
+    } else if (op == 8) {
+        console.log(socket.id + " Time Changed")
+        // time changed, receives decimal seconds, converts to milliseconds
+
+        if (!socket.inRoom) return socket.send(ErrorLoad)
+
+        let roomCode = d.code;
+        let room = RoomManager.getRoom(roomCode);
+        if (!room) return socket.send(ErrorLoad);
+        if (!room.players[socket.id].isLeader) return socket.send(ErrorLoad);
+        let newTime = d.videoTime
+
+        if (newTime !== 0 && !newTime) return socket.send(ErrorLoad)
+
+        let newTimeMilli = newTime * 1000
+        room.setVideoTime(newTimeMilli)
+
+        socket.send(SuccessLoad)
     }
 }
 

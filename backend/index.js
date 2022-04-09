@@ -12,6 +12,7 @@ const BodyParser = require("body-parser");
 App.use(Cors());
 App.use(BodyParser.json());
 App.use(Express.static(path.join(__dirname, "../frontend/build/")))
+App.use("/testvideos", Express.static(path.join(__dirname, "/testvideos")))
 
 App.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname + "/../frontend/build/index.html"))

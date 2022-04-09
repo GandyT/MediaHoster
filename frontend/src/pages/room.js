@@ -124,12 +124,17 @@ export default class Room extends React.Component {
     // these two just use websocket to send pause and unpause payloads
     onPause = () => {
         let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
+        clientRoom.pause()
         let ws = clientSess.socket
         ws.send(JSON.stringify({ op: 4, d: { code: clientSess.roomCode } }))
     }
 
     onUnpause = () => {
         let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
+
+        clientRoom.unpause()
         let ws = clientSess.socket
         ws.send(JSON.stringify({ op: 5, d: { code: clientSess.roomCode } }))
     }

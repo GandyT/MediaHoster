@@ -21,10 +21,6 @@ export default class RoomVideo extends React.Component {
     }
 
     componentDidMount = () => {
-        window.setInterval(() => {
-            this.setState({ videoTime: this.video.current?.currentTime })
-        }, 1000)
-
         // add room callback functions to react with component
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
@@ -37,16 +33,6 @@ export default class RoomVideo extends React.Component {
         // play video
         this.video.current.currentTime = this.state.videoTime
         if (!this.state.paused) this.video.current.play()
-    }
-
-    componentDidUpdate = () => {
-        if (!this.state.videoUrl) return
-
-        if (!this.state.paused) {
-            this.video.current.play()
-        } else {
-            this.video.current.pause()
-        }
     }
 
     pause = () => {
@@ -87,26 +73,6 @@ export default class RoomVideo extends React.Component {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
 
-        let renderBtn = () => {
-            if (this.state.paused) {
-                return <button id="playBtn" onClick={this.onUnpause}>play</button>
-            } else {
-                return <button id="pauseBtn" onClick={this.onPause}>pause</button>
-            }
-        }
-
-        let renderLeaderControls = () => {
-            if (!clientRoom.players[clientSess.id].isLeader) return;
-
-            return (
-                <React.Fragment>
-                    {renderBtn()}
-                    <button id="backwardFive" onClick={() => this.changeTime(this.video.current.currentTime - 5)}>Backward</button>
-                    <button id="forwardFive" onClick={() => this.changeTime(this.video.current.currentTime + 5)}>Forward</button>
-                </React.Fragment>
-            )
-        }
-
         return (
             <div id="customVideoControls">
                 {renderLeaderControls()}
@@ -126,7 +92,7 @@ export default class RoomVideo extends React.Component {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
         // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
-        if (clientRoom.players[clientSess.id].isLeader) {
+        if (this.isClientLeader()) {
             clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
         }
 
@@ -134,20 +100,51 @@ export default class RoomVideo extends React.Component {
         clientRoom.videoTime = 0
         clientRoom.videoUrl = ""
         this.video.current.src = ""
-        this.setState({ videoUrl: "" })
+        this.setState({ videoUrl: "", videoTime: 0 })
         Session.setData(clientSess)
     }
 
+    isClientLeader = () => {
+        let clientSess = Session.getData()
+        let clientRoom = clientSess.roomData
 
+        return clientRoom.players[clientSess.id].isLeader
+    }
 
     render() {
         return (
             <div id="customVideoContainer">
                 <video
+                    controls={this.isClientLeader()}
                     id="customVideo"
                     src={this.state.videoUrl}
                     ref={this.video}
                     onEnded={this.videoEnd}
+                    onPause={() => {
+                        if (this.isClientLeader()) {
+                            console.log("pause")
+                            this.onPause()
+                            this.pause()
+                        }
+                    }}
+                    onPlay={() => {
+                        if (this.isClientLeader()) {
+                            console.log("play")
+                            this.onUnpause()
+                            this.unpause()
+                        }
+                    }}
+                    onTimeUpdate={() => {
+                        let currentTime = this.video.current.currentTime
+                        if (this.isClientLeader()) {
+                            if (Math.abs(currentTime - this.state.videoTime) >= 1) {
+                                this.changeTime(currentTime)
+                            }
+                        }
+
+                        this.setState({ videoTime: currentTime })
+                    }}
+                    style={{ pointerEvents: this.isClientLeader() ? "auto" : "none" }}
                 />
                 {this.renderVideoControls()}
             </div>

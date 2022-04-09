@@ -96,6 +96,7 @@ export default class Room extends React.Component {
                 clientRoom.changeUrl(d.url)
             } else if (op == 9) {
                 console.log("Host video has ended...")
+                clientRoom.videoEnd()
             } else if (op == 10) {
                 // video time update
                 clientRoom.changeTime(d.videoTime)

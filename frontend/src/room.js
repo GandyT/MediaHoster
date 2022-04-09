@@ -47,6 +47,13 @@ class RoomClass {
         }
     }
 
+    videoEnd() {
+        console.log("CALLING VIDEOEND")
+        this.videoTime = 0
+        this.videoUrl = ""
+        this.call("videoend")
+    }
+
     pause() {
         this.paused = true
         this.call("onpause")

@@ -29,6 +29,7 @@ export default class RoomVideo extends React.Component {
         clientRoom.on("onunpause", this.unpause)
         clientRoom.on("ontimechange", this.onTimeChange)
         clientRoom.on("onurlchange", this.onUrlChange)
+        clientRoom.on("videoend", this.videoEnd)
 
         // play video
         this.video.current.currentTime = this.state.videoTime
@@ -53,8 +54,6 @@ export default class RoomVideo extends React.Component {
     onUrlChange = (url) => {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
-        this.video.current.src = url
-        this.video.current.currentTime = 0
 
         this.setState({ videoUrl: url, videoTime: 0 })
     }
@@ -69,18 +68,6 @@ export default class RoomVideo extends React.Component {
         ws.send(JSON.stringify({ op: 8, d: { code: clientSess.roomCode, videoTime: sentTime } }))
     }
 
-    renderVideoControls = () => {
-        let clientSess = Session.getData()
-        let clientRoom = clientSess.roomData
-
-        return (
-            <div id="customVideoControls">
-                {renderLeaderControls()}
-                <div id="videoTime">{Math.floor(this.state.videoTime)}</div>
-            </div>
-        )
-    }
-
     /* 
     this is kinda iffy, it might break stuff but it should increase efficiency
     shouldComponentUpdate = (nextProps) => {
@@ -89,16 +76,10 @@ export default class RoomVideo extends React.Component {
     */
 
     videoEnd = () => {
+        console.log("VIDEO ENDED")
         let clientSess = Session.getData()
-        let clientRoom = clientSess.roomData
-        // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
-        if (this.isClientLeader()) {
-            clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
-        }
 
         // clear video data from room
-        clientRoom.videoTime = 0
-        clientRoom.videoUrl = ""
         this.video.current.src = ""
         this.setState({ videoUrl: "", videoTime: 0 })
         Session.setData(clientSess)
@@ -119,7 +100,14 @@ export default class RoomVideo extends React.Component {
                     id="customVideo"
                     src={this.state.videoUrl}
                     ref={this.video}
-                    onEnded={this.videoEnd}
+                    onEnded={() => {
+                        let clientSess = Session.getData()
+                        // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
+                        if (this.isClientLeader()) {
+                            clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
+                        }
+                        this.videoEnd()
+                    }}
                     onPause={() => {
                         if (this.isClientLeader()) {
                             console.log("pause")
@@ -146,7 +134,6 @@ export default class RoomVideo extends React.Component {
                     }}
                     style={{ pointerEvents: this.isClientLeader() ? "auto" : "none" }}
                 />
-                {this.renderVideoControls()}
             </div>
         )
     }

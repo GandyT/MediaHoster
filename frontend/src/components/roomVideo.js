@@ -88,7 +88,6 @@ export default class RoomVideo extends React.Component {
         let clientRoom = clientSess.roomData
 
         let renderBtn = () => {
-            if (!clientRoom.players[clientSess.id].isLeader) return; // if client isn't leader, no video controls
             if (this.state.paused) {
                 return <button id="playBtn" onClick={this.onUnpause}>play</button>
             } else {
@@ -96,11 +95,21 @@ export default class RoomVideo extends React.Component {
             }
         }
 
+        let renderLeaderControls = () => {
+            if (!clientRoom.players[clientSess.id].isLeader) return;
+
+            return (
+                <React.Fragment>
+                    {renderBtn()}
+                    <button id="backwardFive" onClick={() => this.changeTime(this.video.current.currentTime - 5)}>Backward</button>
+                    <button id="forwardFive" onClick={() => this.changeTime(this.video.current.currentTime + 5)}>Forward</button>
+                </React.Fragment>
+            )
+        }
+
         return (
             <div id="customVideoControls">
-                {renderBtn()}
-                <button id="backwardFive" onClick={() => this.changeTime(this.video.current.currentTime - 5)}>Backward</button>
-                <button id="forwardFive" onClick={() => this.changeTime(this.video.current.currentTime + 5)}>Forward</button>
+                {renderLeaderControls()}
                 <div id="videoTime">{Math.floor(this.state.videoTime)}</div>
             </div>
         )

@@ -48,16 +48,24 @@
 }
 
 .videoControlBtn {
-    height: 40px;
+    height: 38px;
     width: 40px;
     /* TEMP BORDER */
-    transition: 0.3s all ease;
-    cursor: pointer
+    cursor: pointer;
+    background: none;
+    border: none;
+    position: relative;
+    margin-bottom: 1px;
 }
 
-.videoControlBtn:hover {
-    transition: 0.6s all ease;
-    background: #bbb
+#soundControlBtn {
+    height: 38px;
+    width: 40px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    position: relative;
+    margin-bottom: 1px;
 }
 
 #progressBarContainer {
@@ -76,4 +84,116 @@
     background: purple;
     border-radius: 20px;
     cursor: pointer;
+}
+
+#videoTimeline {
+    width: 100%;
+    cursor: pointer;
+}
+
+#soundIcon {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    background: none;
+    border: none;
+    background-image: url("../imgs/sound.png");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#volumeSlider {
+    width: 100px;
+    left: -35px;
+    top: 50px;
+    position: absolute;
+    transform: rotate(270deg);
+    cursor: pointer;
+}
+
+#volumeSliderCont {
+    width: 100%;
+    height: 300%;
+    bottom: 0;
+    position: absolute;
+    background: #fff;
+    visibility: hidden;
+    border-radius: 2px;
+    transition: 0.3s all ease;
+}
+
+#soundIcon:hover~#volumeSliderCont {
+    visibility: visible;
+}
+
+#volumeSliderCont:hover {
+    visibility: visible;
+}
+
+#play {
+    background-image: url("../imgs/playbutton.png");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#pause {
+    background-image: url("../imgs/pause.png");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#skipForward {
+    background-image: url("../imgs/forward.png");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#skipBack {
+    background-image: url("../imgs/forward.png");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* MIRROR THE IMAGE */
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+}
+
+#fullscreen {
+    background-image: url("../imgs/fullscreen.png");
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+@media (max-width: 768px) {
+    #customVideo {
+        width: 384px;
+        height: 216px;
+    }
+
+    #customVideoContainer {
+        width: 384px;
+        height: 216px;
+        border: 1px solid black;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    #volumeSlider {
+        left: -38px;
+        top: 45px;
+    }
+
+    #volumeSliderCont {
+        border: none;
+    }
 }

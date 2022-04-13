@@ -18,7 +18,8 @@ export default class RoomVideo extends React.Component {
             paused: clientRoom.paused,
             videoTime: (clientRoom.videoTime / 1000) || 0,
             videoUrl: clientRoom.videoUrl,
-            fullscreen: false
+            fullscreen: false,
+            volume: 100
         }
     }
 
@@ -43,6 +44,12 @@ export default class RoomVideo extends React.Component {
                 this.setState({ fullscreen: false })
             }
         });
+    }
+
+    componentDidUpdate = () => {
+        if (this.video.current) {
+            this.video.current.volume = this.state.volume / 100
+        }
     }
 
     pause = () => {
@@ -158,14 +165,40 @@ export default class RoomVideo extends React.Component {
                 return <button className="videoControlBtn" id="pause" onClick={() => { if (this.isClientLeader()) this.video.current?.pause() }} />
             }
         }
+        /*
+                <div id="progressBarContainer">
+                    <div id="progress" style={{ width: `${(this.video.current?.currentTime / this.video.current?.duration) * 100 || 0}%` }}></div>
+                </div>
+        */
 
+        const onSlider = (event) => {
+            if (!this.video.current) return;
+            if (!this.isClientLeader()) return;
+
+            let newTime = (event.target.value / 100) * this.video.current.duration
+            this.video.current.currentTime = (event.target.value / 100) * this.video.current?.duration
+            this.changeTime(newTime)
+            this.setState({ videoTime: newTime })
+        }
+
+        const volumeChange = event => {
+            if (!this.video.current) return;
+
+            this.setState({ volume: event.target.value })
+        }
+
+        let newTimeValue = Math.floor(this.video.current?.currentTime / this.video.current?.duration * 100) || 0
         return (
             <div id={this.state.fullscreen ? "videoControlsFull" : "videoControls"}>
                 <button className="videoControlBtn" id="skipBack" onClick={() => { if (this.isClientLeader()) this.changeTime(this.video.current.currentTime - 5) }} />
                 {renderPlayPause()}
                 <button className="videoControlBtn" id="skipForward" onClick={() => { if (this.isClientLeader()) this.changeTime(this.video.current.currentTime + 5) }} />
-                <div id="progressBarContainer">
-                    <div id="progress" style={{ width: `${(this.video.current?.currentTime / this.video.current?.duration) * 100 || 0}%` }}></div>
+                <input id="videoTimeline" min="0" max="100" type="range" onChange={onSlider} value={newTimeValue} />
+                <div id="soundControlBtn">
+                    <button id="soundIcon"></button>
+                    <div id="volumeSliderCont">
+                        <input id="volumeSlider" type="range" min="0" max="100" onChange={volumeChange} value={this.state.volume} />
+                    </div>
                 </div>
                 <button className="videoControlBtn" id="fullscreen" onClick={() => {
                     let newFullScreen = !this.state.fullscreen
@@ -178,6 +211,7 @@ export default class RoomVideo extends React.Component {
 
                     this.setState({ fullscreen: newFullScreen })
                 }} />
+
             </div>
         )
     }

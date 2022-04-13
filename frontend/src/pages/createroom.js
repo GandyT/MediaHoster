@@ -2,6 +2,7 @@ import React from "react";
 import Session from "../sessionManager.js";
 import { Navigate } from "react-router-dom"
 import * as Axios from "axios";
+import "./createroom.css"
 
 export default class CreateRoom extends React.Component {
     constructor(props) {
@@ -59,9 +60,11 @@ export default class CreateRoom extends React.Component {
             <React.Fragment>
                 {this.redirect()}
                 <div id="createRoomPage">
-                    <input className="createRoomInput" placeholder="username" onChange={this.usernameChange} onFocus={(e) => { this.setState({ error: "" }) }} />
-                    <button className="createRoomBtn" onClick={this.createRoom}>Create Room</button>
-                    <div className="createRoomError">{this.state.error}</div>
+                    <div id="homePageTitle" className="floating">Create Room!</div>
+                    <div id="createRoomMain">
+                        <input className="createRoomInput" placeholder="username" onChange={this.usernameChange} onFocus={(e) => { this.setState({ error: "" }) }} />
+                        <button className="homePageBtn" onClick={this.createRoom}>Create Room</button>
+                    </div>
                 </div>
             </React.Fragment>
         )

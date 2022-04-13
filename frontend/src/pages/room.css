@@ -29,9 +29,26 @@
 #urlInput {
     font-size: 20px;
     margin-right: 10px;
+    background: none;
+    padding: 5px;
+    border: 2px solid black;
+    border-radius: 5px;
 }
 
 #urlInputBtn {
     font-size: 20px;
     margin-left: 10px;
+    background: none;
+    border-radius: 20px;
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    transition: 0.3s all ease;
+}
+
+#urlInputBtn:hover {
+    transition: 0.6s all ease;
+    background: #bbb;
 }

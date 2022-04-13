@@ -177,7 +177,7 @@ export default class Room extends React.Component {
 
     renderPage = () => {
         if (this.state.loading) {
-            return <div className="LoadingScreen">Loading</div>
+            return <div className="loadingScreen floating">Loading...</div>
         } else {
             // actual page
             return (

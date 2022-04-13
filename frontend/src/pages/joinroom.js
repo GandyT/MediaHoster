@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom"
 import Session from "../sessionManager.js"
+import "./joinroom.css"
 
 export default class JoinRoom extends React.Component {
     constructor(props) {
@@ -44,9 +45,14 @@ export default class JoinRoom extends React.Component {
             <React.Fragment>
                 {this.redirect()}
                 <div id="joinRoomPage">
-                    <input id="joinRoomUsername" value={this.state.usernameInput} placeholder="Username" onChange={this.usernameChange} />
-                    <input id="joinRoomCode" value={this.state.codeInput} placeholder="Room Code" onChange={this.codeChange} />
-                    <button id="joinRoomButton" onClick={this.joinRoom}>Join Room</button>
+                    <div id="homePageTitle" className="floating">Join Room!</div>
+                    <div id="joinRoomMain">
+                        <input className="createRoomInput" id="joinRoomUsername" value={this.state.usernameInput} placeholder="Username" onChange={this.usernameChange} />
+                        <div className="break" />
+                        <input className="createRoomInput" id="joinRoomCode" value={this.state.codeInput} placeholder="Room Code" onChange={this.codeChange} />
+                        <div className="break" />
+                        <button className="homePageBtn" id="joinRoomButton" onClick={this.joinRoom}>Join Room</button>
+                    </div>
                 </div>
             </React.Fragment>
         )

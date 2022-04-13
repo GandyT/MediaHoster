@@ -1,6 +1,7 @@
 import React from "react";
 import Session from "../sessionManager.js";
-import { Navigate } from "react-router-dom"
+import { Navigate } from "react-router-dom";
+import "./home.css"
 
 export default class Home extends React.Component {
     constructor(props) {
@@ -38,7 +39,7 @@ export default class Home extends React.Component {
             <React.Fragment>
                 {this.redirect()}
                 <div id="homePage">
-                    <div>MediaParty!</div>
+                    <div id="homePageTitle" className="floating">MediaParty!</div>
                     <div id="homePageBtns">
                         <button className="homePageBtn" onClick={(e) => {
                             if (Session.getData().socket) {

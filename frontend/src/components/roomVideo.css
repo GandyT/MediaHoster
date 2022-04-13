@@ -1,0 +1,79 @@
+#customVideo {
+    width: 768px;
+    height: 432px;
+    background: #000;
+}
+
+#fullscreenVideo {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+}
+
+#customVideoContainer {
+    width: 768px;
+    height: 472px;
+    border: 1px solid black;
+    margin-top: 20px;
+}
+
+#fullscreenVideoContainer {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#videoControls {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+#videoControlsFull {
+    width: 100vw;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    z-index: 7;
+    background: #fff;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+}
+
+.videoControlBtn {
+    height: 40px;
+    width: 40px;
+    /* TEMP BORDER */
+    transition: 0.3s all ease;
+    cursor: pointer
+}
+
+.videoControlBtn:hover {
+    transition: 0.6s all ease;
+    background: #bbb
+}
+
+#progressBarContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#progress {
+    width: 100%;
+    height: 20px;
+    background: purple;
+    border-radius: 20px;
+    cursor: pointer;
+}

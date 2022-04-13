@@ -1,0 +1,21 @@
+#playersList {
+    width: 700px;
+    margin-top: 20px;
+}
+
+#playerTitle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.playerListElement {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-top: 5px;
+}

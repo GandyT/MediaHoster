@@ -1,5 +1,6 @@
 import Session from "../sessionManager.js";
 import React from "react"
+import "./playerList.css"
 
 // TODO: add kick and promote functionality later
 export default class PlayerList extends React.Component {
@@ -25,7 +26,7 @@ export default class PlayerList extends React.Component {
     }
 
     renderPlayers = () => {
-        let playerList = [] // push divs into here
+        let playerList = [<div id="playerTitle">Members</div>] // push divs into here
         let clientSess = Session.getData()
 
         let i = 0

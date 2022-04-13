@@ -1,5 +1,6 @@
 import Session from "../sessionManager.js";
 import React from "react"
+import "./roomVideo.css"
 
 export default class RoomVideo extends React.Component {
     constructor(props) {
@@ -16,7 +17,8 @@ export default class RoomVideo extends React.Component {
         this.state = {
             paused: clientRoom.paused,
             videoTime: (clientRoom.videoTime / 1000) || 0,
-            videoUrl: clientRoom.videoUrl
+            videoUrl: clientRoom.videoUrl,
+            fullscreen: false
         }
     }
 
@@ -34,6 +36,13 @@ export default class RoomVideo extends React.Component {
         // play video
         this.video.current.currentTime = this.state.videoTime
         if (!this.state.paused) this.video.current.play()
+
+        // fullscreen logic
+        document.addEventListener("fullscreenchange", event => {
+            if (!document.fullscreenElement) {
+                this.setState({ fullscreen: false })
+            }
+        });
     }
 
     pause = () => {
@@ -54,6 +63,7 @@ export default class RoomVideo extends React.Component {
     onUrlChange = (url) => {
         let clientSess = Session.getData()
         let clientRoom = clientSess.roomData
+
 
         this.setState({ videoUrl: url, videoTime: 0 })
     }
@@ -92,48 +102,91 @@ export default class RoomVideo extends React.Component {
         return clientRoom.players[clientSess.id].isLeader
     }
 
+    renderVideo = () => {
+        return (
+            <video
+                src={this.state.videoUrl}
+                controls={false}
+                id={this.state.fullscreen ? "fullscreenVideo" : "customVideo"}
+                ref={this.video}
+                onEnded={() => {
+                    let clientSess = Session.getData()
+                    // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
+                    if (this.isClientLeader()) {
+                        clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
+                    }
+                    this.videoEnd()
+                }}
+                onPause={() => {
+                    if (this.isClientLeader()) {
+                        console.log("pause")
+                        this.onPause()
+                        this.pause()
+                    }
+                }}
+                onPlay={() => {
+                    if (this.isClientLeader()) {
+                        console.log("play")
+                        this.onUnpause()
+                        this.unpause()
+                    }
+                }}
+                onTimeUpdate={() => {
+                    let currentTime = this.video.current.currentTime
+                    if (this.isClientLeader()) {
+                        if (Math.abs(currentTime - this.state.videoTime) >= 1) {
+                            this.changeTime(currentTime)
+                        }
+                    }
+
+                    this.setState({ videoTime: currentTime })
+                }}
+                style={{ pointerEvents: this.isClientLeader() ? "auto" : "none" }}
+            >
+            </video>
+        )
+    }
+
+    renderVideoControls = () => {
+        // 3 vid control btns, skip 5 sec back, play/pause, 5 sec forward, + time line + fullscreen btn
+        const renderPlayPause = () => {
+            if (this.state.paused) {
+                // put play
+                return <button className="videoControlBtn" id="play" onClick={() => { if (this.isClientLeader()) this.video.current?.play() }} />
+            } else {
+                // put pause
+                return <button className="videoControlBtn" id="pause" onClick={() => { if (this.isClientLeader()) this.video.current?.pause() }} />
+            }
+        }
+
+        return (
+            <div id={this.state.fullscreen ? "videoControlsFull" : "videoControls"}>
+                <button className="videoControlBtn" id="skipBack" onClick={() => { if (this.isClientLeader()) this.changeTime(this.video.current.currentTime - 5) }} />
+                {renderPlayPause()}
+                <button className="videoControlBtn" id="skipForward" onClick={() => { if (this.isClientLeader()) this.changeTime(this.video.current.currentTime + 5) }} />
+                <div id="progressBarContainer">
+                    <div id="progress" style={{ width: `${(this.video.current?.currentTime / this.video.current?.duration) * 100 || 0}%` }}></div>
+                </div>
+                <button className="videoControlBtn" id="fullscreen" onClick={() => {
+                    let newFullScreen = !this.state.fullscreen
+
+                    if (newFullScreen) {
+                        document.documentElement.requestFullscreen()
+                    } else {
+                        document.exitFullscreen()
+                    }
+
+                    this.setState({ fullscreen: newFullScreen })
+                }} />
+            </div>
+        )
+    }
+
     render() {
         return (
-            <div id="customVideoContainer">
-                <video
-                    controls={this.isClientLeader()}
-                    id="customVideo"
-                    src={this.state.videoUrl}
-                    ref={this.video}
-                    onEnded={() => {
-                        let clientSess = Session.getData()
-                        // IF CLIENT IS LEADER, SEND WS PAYLOAD - video ended
-                        if (this.isClientLeader()) {
-                            clientSess.socket.send(JSON.stringify({ op: 7, d: { code: clientSess.roomCode } }))
-                        }
-                        this.videoEnd()
-                    }}
-                    onPause={() => {
-                        if (this.isClientLeader()) {
-                            console.log("pause")
-                            this.onPause()
-                            this.pause()
-                        }
-                    }}
-                    onPlay={() => {
-                        if (this.isClientLeader()) {
-                            console.log("play")
-                            this.onUnpause()
-                            this.unpause()
-                        }
-                    }}
-                    onTimeUpdate={() => {
-                        let currentTime = this.video.current.currentTime
-                        if (this.isClientLeader()) {
-                            if (Math.abs(currentTime - this.state.videoTime) >= 1) {
-                                this.changeTime(currentTime)
-                            }
-                        }
-
-                        this.setState({ videoTime: currentTime })
-                    }}
-                    style={{ pointerEvents: this.isClientLeader() ? "auto" : "none" }}
-                />
+            <div id={this.state.fullscreen ? "fullscreenVideoContainer" : "customVideoContainer"}>
+                {this.renderVideo()}
+                {this.renderVideoControls()}
             </div>
         )
     }

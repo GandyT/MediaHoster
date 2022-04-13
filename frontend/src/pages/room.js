@@ -6,6 +6,7 @@ import RoomClass from "../room.js"
 import RoomVideo from "../components/roomVideo.js"
 import PlayerList from "../components/playerList.js"
 import ErrorCard from "../components/errorCard.js"
+import "./room.css"
 
 // bug when changing url video doesn't play
 
@@ -166,7 +167,7 @@ export default class Room extends React.Component {
             return (
                 <div id="urlInputCont">
                     <input id="urlInput" placeholder="enter a url" onChange={this.onUrlChange} value={this.state.urlInput} />
-                    <button onClick={this.changeUrl}>Change Url</button>
+                    <button id="urlInputBtn" onClick={this.changeUrl}>Change Url</button>
                 </div>
             )
     }
@@ -186,10 +187,12 @@ export default class Room extends React.Component {
                     {this.renderError()}
                     <div id="roomPage">
                         <div id="roomData">
-                            <div id="roomCode">{Session.getData().roomData.roomCode}</div>
+                            <div id="roomCode">Room Code: {Session.getData().roomData.roomCode}</div>
                         </div>
-                        <RoomVideo onPause={this.onPause} onUnpause={this.onUnpause} />
-                        <PlayerList />
+                        <div id="roomMain">
+                            <RoomVideo onPause={this.onPause} onUnpause={this.onUnpause} />
+                            <PlayerList />
+                        </div>
                         {this.renderUrlInput()}
                     </div>
                 </React.Fragment>

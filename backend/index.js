@@ -13,6 +13,7 @@ App.use(Cors());
 App.use(BodyParser.json());
 App.use(Express.static(path.join(__dirname, "../frontend/build/")))
 App.use("/testvideos", Express.static(path.join(__dirname, "/testvideos")))
+App.use("/youtubevideos", Express.static(path.join(__dirname, "/youtubevideos")))
 
 App.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname + "/../frontend/build/index.html"))
@@ -21,6 +22,7 @@ App.get("/*", (req, res) => {
 /* BACKEND ROUTES */
 App.use("/api/createroom", require("./routes/createroom.js"));
 App.use("/api/roomexists", require("./routes/roomexists.js"));
+App.use("/api/downloadyoutube", require("./routes/downloadyoutube.js"));
 
 App.listen(80, () => {
     console.log(`App is running on Port 80`);

@@ -139,7 +139,7 @@ export default class Room extends React.Component {
         ws.send(JSON.stringify({ op: 5, d: { code: clientSess.roomCode } }))
     }
 
-    changeUrl = () => {
+    changeUrl = async () => {
         let clientSess = Session.getData()
         let ws = clientSess.socket
 
@@ -149,8 +149,17 @@ export default class Room extends React.Component {
         }
         /* ==================================== */
 
+        let finalUrl = this.state.urlInput
+        let youtubeRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/ // obviously stolen from the internet
+        if (youtubeRegex.test(this.state.urlInput)) {
+            let youtubeData = await Axios.post("api/downloadyoutube", { youtubeUrl: this.state.urlInput });
+            if (!youtubeData.data.success) return this.setState({ error: "Invalid Url" });
+
+            finalUrl = `http://www.${window.location.hostname}:80/${youtubeData.data.path}`
+        }
+
         // send websocket payload
-        ws.send(JSON.stringify({ op: 6, d: { code: clientSess.roomCode, url: this.state.urlInput } }))
+        ws.send(JSON.stringify({ op: 6, d: { code: clientSess.roomCode, url: finalUrl } }))
     }
 
     onUrlChange = (e) => {

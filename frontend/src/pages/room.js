@@ -155,7 +155,7 @@ export default class Room extends React.Component {
             let youtubeData = await Axios.post("api/downloadyoutube", { youtubeUrl: this.state.urlInput });
             if (!youtubeData.data.success) return this.setState({ error: "Invalid Url" });
 
-            finalUrl = `http://www.${window.location.hostname}:80/${youtubeData.data.path}`
+            finalUrl = `http://${window.location.hostname}:80/${youtubeData.data.path}`
         }
 
         // send websocket payload
